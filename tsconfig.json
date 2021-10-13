@@ -1,0 +1,27 @@
+{
+	"compilerOptions": {
+		"target": "es2017",
+		"module": "commonjs",
+		"declaration": true,
+		"declarationMap": false,
+		"sourceMap": false,
+		"outDir": "./lib",
+		"rootDir": "./src",
+		"strict": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"noImplicitReturns": true,
+		"noFallthroughCasesInSwitch": true,
+		"moduleResolution": "node",
+		"allowSyntheticDefaultImports": true,
+		"experimentalDecorators": true,
+		"forceConsistentCasingInFileNames": true,
+		"skipLibCheck": true,
+		"plugins": []
+	},
+	"include": [
+		"src/**/*.ts",
+		"node_modules/dayjs/plugin/utc.d.ts"
+	],
+	"exclude": []
+}
