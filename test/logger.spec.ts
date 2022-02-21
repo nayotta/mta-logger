@@ -3,30 +3,15 @@ import { Logger } from '../src'
 test('basic', () => {
 	const logger = new Logger({
 		level: 'info',
+		position: 'test',
 		timeFormat: 'YYYY/MM/DD HH:mm:ss'
 	})
 	expect(logger.level).toBe('info')
 	expect(logger.timeFormat).toBe('YYYY/MM/DD HH:mm:ss')
 
 	// log prefix
-	const logPrefix = logger.buildPrefix('warn', 'test')
+	const logPrefix = logger.buildPrefix('warn')
 	expect(/^\[warn\].+\[test\]$/.test(logPrefix)).toBe(true)
-})
-
-test('initial with position', () => {
-	const logger = new Logger({
-		level: 'all',
-		position: 'position',
-		timeFormat: 'YYYY/MM/DD HH:mm:ss'
-	})
-	expect(logger.level).toBe('all')
-	expect(logger.timeFormat).toBe('YYYY/MM/DD HH:mm:ss')
-
-	const logPrefix = logger.buildPrefix('warn') as string
-	expect(/^\[warn\].+\[position\]$/.test(logPrefix)).toBe(true)
-
-	const logWithPositionPrefix = logger.buildPrefix('warn', 'test') as string
-	expect(/^\[warn\].+\[test\]$/.test(logWithPositionPrefix)).toBe(true)
 })
 
 test('without position', () => {
@@ -47,7 +32,7 @@ test('level [all]', () => {
 
 	const logLevels = ['info', 'debug', 'warn', 'error']
 	for (let i = 0; i < logLevels.length; i++) {
-		const logPrefix = logger.buildPrefix(logLevels[i], 'test')
+		const logPrefix = logger.buildPrefix(logLevels[i])
 		expect(logPrefix).toBeDefined()
 	}
 })
@@ -61,7 +46,7 @@ test('level [info]', () => {
 	const logLevels = ['info', 'debug', 'warn', 'error']
 	const logLevelIndex = 0
 	for (let i = 0; i < logLevels.length; i++) {
-		const logPrefix = logger.buildPrefix(logLevels[i], 'test')
+		const logPrefix = logger.buildPrefix(logLevels[i])
 		if (i >= logLevelIndex) {
 			expect(logPrefix).toBeDefined()
 		} else {
@@ -79,7 +64,7 @@ test('level [debug]', () => {
 	const logLevels = ['info', 'debug', 'warn', 'error']
 	const logLevelIndex = 1
 	for (let i = 0; i < logLevels.length; i++) {
-		const logPrefix = logger.buildPrefix(logLevels[i], 'test')
+		const logPrefix = logger.buildPrefix(logLevels[i])
 		if (i >= logLevelIndex) {
 			expect(logPrefix).toBeDefined()
 		} else {
@@ -97,7 +82,7 @@ test('level [warn]', () => {
 	const logLevels = ['info', 'debug', 'warn', 'error']
 	const logLevelIndex = 2
 	for (let i = 0; i < logLevels.length; i++) {
-		const logPrefix = logger.buildPrefix(logLevels[i], 'test')
+		const logPrefix = logger.buildPrefix(logLevels[i])
 		if (i >= logLevelIndex) {
 			expect(logPrefix).toBeDefined()
 		} else {
@@ -115,7 +100,7 @@ test('level [error]', () => {
 	const logLevels = ['info', 'debug', 'warn', 'error']
 	const logLevelIndex = 3
 	for (let i = 0; i < logLevels.length; i++) {
-		const logPrefix = logger.buildPrefix(logLevels[i], 'test')
+		const logPrefix = logger.buildPrefix(logLevels[i])
 		if (i >= logLevelIndex) {
 			expect(logPrefix).toBeDefined()
 		} else {
@@ -133,7 +118,7 @@ test('level [off]', () => {
 	const logLevels = ['info', 'debug', 'warn', 'error']
 	const logLevelIndex = 4
 	for (let i = 0; i < logLevels.length; i++) {
-		const logPrefix = logger.buildPrefix(logLevels[i], 'test')
+		const logPrefix = logger.buildPrefix(logLevels[i])
 		if (i >= logLevelIndex) {
 			expect(logPrefix).toBeDefined()
 		} else {

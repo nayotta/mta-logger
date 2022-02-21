@@ -20,32 +20,30 @@ export class Logger {
 		if (option.timeFormat) this.timeFormat = option.timeFormat
 	}
 
-	private _log (level: string, position?: string, log?: any[]): void {
-		const positionVal = position || this.position
-		console.log(this.buildPrefix(level, positionVal), ...(log || []))
+	private _log (level: string, log?: any[]): void {
+		console.log(this.buildPrefix(level), ...(log || []))
 	}
 
-	public buildPrefix (level: string, position?: string): string {
+	public buildPrefix (level: string): string {
 		const logLevel = this.levels.findIndex(item => item === level)
 		if (logLevel < this.currentLevelIndex) return ''
 		const now = dayjs().format(this.timeFormat)
-		const positionVal = position || this.position
-		return positionVal ? `[${level}] ${now} [${positionVal}]` : `[${level}] ${now}`
+		return this.position ? `[${level}] ${now} [${this.position}]` : `[${level}] ${now}`
 	}
 
-	public info (position?: string, ...log: any[]) {
-		this._log('info', position, log)
+	public info (...log: any[]) {
+		this._log('info', log)
 	}
 
-	public debug (position?: string, ...log: any[]) {
-		this._log('debug', position, log)
+	public debug (...log: any[]) {
+		this._log('debug', log)
 	}
 
-	public warn (position?: string, ...log: any[]) {
-		this._log('warn', position, log)
+	public warn (...log: any[]) {
+		this._log('warn', log)
 	}
 
-	public error (position?: string, ...log: any[]) {
-		this._log('error', position, log)
+	public error (...log: any[]) {
+		this._log('error', log)
 	}
 }

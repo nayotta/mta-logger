@@ -6,33 +6,16 @@
 
 ## example
 
-### common logger
-
-```ts
-import { Logger } from '@nayotta/mta-logger'
-
-const logger = new Logger({
-	level: 'all'
-})
-
-logger.info('init app', 'app start on port', 8080)
-
-// print
-// [info] 2021-10-13T15:20:19:042 [init app] app start on port 8080
-```
-
-### position logger
-
 ```ts
 import { Logger } from '@nayotta/mta-logger'
 
 const logger = new Logger({
 	level: 'all',
-	position: 'func_name'
+	position: 'init app'
 })
 
-logger.info('running by port', 8080)
+logger.info('app start on port', 8080)
 
 // print
-// [info] 2021-10-13T15:20:19:042 [func_name] running by port 8080
+// [info] 2021-10-13T15:20:19:042 [init app] app start on port 8080
 ```
