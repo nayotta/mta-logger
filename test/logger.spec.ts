@@ -1,4 +1,4 @@
-import Logger from '../src'
+import { Logger } from '../src'
 
 test('basic', () => {
 	const logger = new Logger({
@@ -9,8 +9,34 @@ test('basic', () => {
 	expect(logger.timeFormat).toBe('YYYY/MM/DD HH:mm:ss')
 
 	// log prefix
-	const logPrefix = logger.buildPrefix('warn', 'test') as string
+	const logPrefix = logger.buildPrefix('warn', 'test')
 	expect(/^\[warn\].+\[test\]$/.test(logPrefix)).toBe(true)
+})
+
+test('initial with position', () => {
+	const logger = new Logger({
+		level: 'all',
+		position: 'position',
+		timeFormat: 'YYYY/MM/DD HH:mm:ss'
+	})
+	expect(logger.level).toBe('all')
+	expect(logger.timeFormat).toBe('YYYY/MM/DD HH:mm:ss')
+
+	const logPrefix = logger.buildPrefix('warn') as string
+	expect(/^\[warn\].+\[position\]$/.test(logPrefix)).toBe(true)
+
+	const logWithPositionPrefix = logger.buildPrefix('warn', 'test') as string
+	expect(/^\[warn\].+\[test\]$/.test(logWithPositionPrefix)).toBe(true)
+})
+
+test('without position', () => {
+	const logger = new Logger({
+		level: 'all',
+		timeFormat: 'YYYY/MM/DD HH:mm:ss'
+	})
+
+	const logPrefix = logger.buildPrefix('warn') as string
+	expect(/^\[warn\].+\[.+\]$/.test(logPrefix)).toBe(false)
 })
 
 test('level [all]', () => {
@@ -57,7 +83,7 @@ test('level [debug]', () => {
 		if (i >= logLevelIndex) {
 			expect(logPrefix).toBeDefined()
 		} else {
-			expect(logPrefix).toBe(undefined)
+			expect(logPrefix).toBe('')
 		}
 	}
 })
@@ -75,7 +101,7 @@ test('level [warn]', () => {
 		if (i >= logLevelIndex) {
 			expect(logPrefix).toBeDefined()
 		} else {
-			expect(logPrefix).toBe(undefined)
+			expect(logPrefix).toBe('')
 		}
 	}
 })
@@ -93,7 +119,7 @@ test('level [error]', () => {
 		if (i >= logLevelIndex) {
 			expect(logPrefix).toBeDefined()
 		} else {
-			expect(logPrefix).toBe(undefined)
+			expect(logPrefix).toBe('')
 		}
 	}
 })
@@ -111,7 +137,7 @@ test('level [off]', () => {
 		if (i >= logLevelIndex) {
 			expect(logPrefix).toBeDefined()
 		} else {
-			expect(logPrefix).toBe(undefined)
+			expect(logPrefix).toBe('')
 		}
 	}
 })
