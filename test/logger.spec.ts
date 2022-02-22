@@ -32,8 +32,8 @@ test('level [all]', () => {
 
 	const logLevels = ['info', 'debug', 'warn', 'error']
 	for (let i = 0; i < logLevels.length; i++) {
-		const logPrefix = logger.buildPrefix(logLevels[i])
-		expect(logPrefix).toBeDefined()
+		const levelPass = logger.doLevelCheck(logLevels[i])
+		expect(levelPass).toBe(true)
 	}
 })
 
@@ -46,11 +46,11 @@ test('level [info]', () => {
 	const logLevels = ['info', 'debug', 'warn', 'error']
 	const logLevelIndex = 0
 	for (let i = 0; i < logLevels.length; i++) {
-		const logPrefix = logger.buildPrefix(logLevels[i])
+		const levelPass = logger.doLevelCheck(logLevels[i])
 		if (i >= logLevelIndex) {
-			expect(logPrefix).toBeDefined()
+			expect(levelPass).toBe(true)
 		} else {
-			expect(logPrefix).toBe(undefined)
+			expect(levelPass).toBe(false)
 		}
 	}
 })
@@ -64,11 +64,11 @@ test('level [debug]', () => {
 	const logLevels = ['info', 'debug', 'warn', 'error']
 	const logLevelIndex = 1
 	for (let i = 0; i < logLevels.length; i++) {
-		const logPrefix = logger.buildPrefix(logLevels[i])
+		const levelPass = logger.doLevelCheck(logLevels[i])
 		if (i >= logLevelIndex) {
-			expect(logPrefix).toBeDefined()
+			expect(levelPass).toBe(true)
 		} else {
-			expect(logPrefix).toBe('')
+			expect(levelPass).toBe(false)
 		}
 	}
 })
@@ -82,11 +82,11 @@ test('level [warn]', () => {
 	const logLevels = ['info', 'debug', 'warn', 'error']
 	const logLevelIndex = 2
 	for (let i = 0; i < logLevels.length; i++) {
-		const logPrefix = logger.buildPrefix(logLevels[i])
+		const levelPass = logger.doLevelCheck(logLevels[i])
 		if (i >= logLevelIndex) {
-			expect(logPrefix).toBeDefined()
+			expect(levelPass).toBe(true)
 		} else {
-			expect(logPrefix).toBe('')
+			expect(levelPass).toBe(false)
 		}
 	}
 })
@@ -100,11 +100,11 @@ test('level [error]', () => {
 	const logLevels = ['info', 'debug', 'warn', 'error']
 	const logLevelIndex = 3
 	for (let i = 0; i < logLevels.length; i++) {
-		const logPrefix = logger.buildPrefix(logLevels[i])
+		const levelPass = logger.doLevelCheck(logLevels[i])
 		if (i >= logLevelIndex) {
-			expect(logPrefix).toBeDefined()
+			expect(levelPass).toBe(true)
 		} else {
-			expect(logPrefix).toBe('')
+			expect(levelPass).toBe(false)
 		}
 	}
 })
@@ -118,11 +118,11 @@ test('level [off]', () => {
 	const logLevels = ['info', 'debug', 'warn', 'error']
 	const logLevelIndex = 4
 	for (let i = 0; i < logLevels.length; i++) {
-		const logPrefix = logger.buildPrefix(logLevels[i])
+		const levelPass = logger.doLevelCheck(logLevels[i])
 		if (i >= logLevelIndex) {
-			expect(logPrefix).toBeDefined()
+			expect(levelPass).toBe(true)
 		} else {
-			expect(logPrefix).toBe('')
+			expect(levelPass).toBe(false)
 		}
 	}
 })

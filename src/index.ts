@@ -21,12 +21,17 @@ export class Logger {
 	}
 
 	private _log (level: string, log?: any[]): void {
+		if (!this.doLevelCheck(level)) return
 		console.log(this.buildPrefix(level), ...(log || []))
 	}
 
-	public buildPrefix (level: string): string {
+	public doLevelCheck (level: string) {
 		const logLevel = this.levels.findIndex(item => item === level)
-		if (logLevel < this.currentLevelIndex) return ''
+		return logLevel >= this.currentLevelIndex
+	}
+
+	public buildPrefix (level: string): string {
+		if (!this.doLevelCheck(level)) return ''
 		const now = dayjs().format(this.timeFormat)
 		return this.position ? `[${level}] ${now} [${this.position}]` : `[${level}] ${now}`
 	}
