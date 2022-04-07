@@ -30,20 +30,20 @@ test('level [all]', () => {
 	})
 	expect(logger.level).toBe('all')
 
-	const logLevels = ['info', 'debug', 'warn', 'error']
+	const logLevels = ['trace', 'debug', 'info', 'warn', 'error', 'fatal']
 	for (let i = 0; i < logLevels.length; i++) {
 		const levelPass = logger.doLevelCheck(logLevels[i])
 		expect(levelPass).toBe(true)
 	}
 })
 
-test('level [info]', () => {
+test('level [trace]', () => {
 	const logger = new Logger({
-		level: 'info'
+		level: 'trace'
 	})
-	expect(logger.level).toBe('info')
+	expect(logger.level).toBe('trace')
 
-	const logLevels = ['info', 'debug', 'warn', 'error']
+	const logLevels = ['trace', 'debug', 'info', 'warn', 'error', 'fatal']
 	const logLevelIndex = 0
 	for (let i = 0; i < logLevels.length; i++) {
 		const levelPass = logger.doLevelCheck(logLevels[i])
@@ -61,8 +61,26 @@ test('level [debug]', () => {
 	})
 	expect(logger.level).toBe('debug')
 
-	const logLevels = ['info', 'debug', 'warn', 'error']
+	const logLevels = ['trace', 'debug', 'info', 'warn', 'error', 'fatal']
 	const logLevelIndex = 1
+	for (let i = 0; i < logLevels.length; i++) {
+		const levelPass = logger.doLevelCheck(logLevels[i])
+		if (i >= logLevelIndex) {
+			expect(levelPass).toBe(true)
+		} else {
+			expect(levelPass).toBe(false)
+		}
+	}
+})
+
+test('level [info]', () => {
+	const logger = new Logger({
+		level: 'info'
+	})
+	expect(logger.level).toBe('info')
+
+	const logLevels = ['trace', 'debug', 'info', 'warn', 'error', 'fatal']
+	const logLevelIndex = 2
 	for (let i = 0; i < logLevels.length; i++) {
 		const levelPass = logger.doLevelCheck(logLevels[i])
 		if (i >= logLevelIndex) {
@@ -79,8 +97,8 @@ test('level [warn]', () => {
 	})
 	expect(logger.level).toBe('warn')
 
-	const logLevels = ['info', 'debug', 'warn', 'error']
-	const logLevelIndex = 2
+	const logLevels = ['trace', 'debug', 'info', 'warn', 'error', 'fatal']
+	const logLevelIndex = 3
 	for (let i = 0; i < logLevels.length; i++) {
 		const levelPass = logger.doLevelCheck(logLevels[i])
 		if (i >= logLevelIndex) {
@@ -97,8 +115,26 @@ test('level [error]', () => {
 	})
 	expect(logger.level).toBe('error')
 
-	const logLevels = ['info', 'debug', 'warn', 'error']
-	const logLevelIndex = 3
+	const logLevels = ['trace', 'debug', 'info', 'warn', 'error', 'fatal']
+	const logLevelIndex = 4
+	for (let i = 0; i < logLevels.length; i++) {
+		const levelPass = logger.doLevelCheck(logLevels[i])
+		if (i >= logLevelIndex) {
+			expect(levelPass).toBe(true)
+		} else {
+			expect(levelPass).toBe(false)
+		}
+	}
+})
+
+test('level [fatal]', () => {
+	const logger = new Logger({
+		level: 'fatal'
+	})
+	expect(logger.level).toBe('fatal')
+
+	const logLevels = ['trace', 'debug', 'info', 'warn', 'error', 'fatal']
+	const logLevelIndex = 5
 	for (let i = 0; i < logLevels.length; i++) {
 		const levelPass = logger.doLevelCheck(logLevels[i])
 		if (i >= logLevelIndex) {
@@ -115,8 +151,8 @@ test('level [off]', () => {
 	})
 	expect(logger.level).toBe('off')
 
-	const logLevels = ['info', 'debug', 'warn', 'error']
-	const logLevelIndex = 4
+	const logLevels = ['trace', 'debug', 'info', 'warn', 'error', 'fatal']
+	const logLevelIndex = 6
 	for (let i = 0; i < logLevels.length; i++) {
 		const levelPass = logger.doLevelCheck(logLevels[i])
 		if (i >= logLevelIndex) {

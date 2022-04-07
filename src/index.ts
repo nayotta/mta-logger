@@ -1,9 +1,9 @@
 import * as dayjs from 'dayjs'
 
-export type TLevel = 'all'|'info'|'debug'|'warn'|'error'|'off'
+export type TLevel = 'all'|'trace'|'debug'|'info'|'warn'|'error'|'fatal'|'off'
 
 export class Logger {
-	private levels: TLevel[] = ['all', 'info', 'debug', 'warn', 'error', 'off']
+	private levels: TLevel[] = ['all', 'trace', 'debug', 'info', 'warn', 'error', 'fatal', 'off']
 	private currentLevelIndex: number
 	public level: string
 	public position: string = ''
@@ -36,12 +36,16 @@ export class Logger {
 		return this.position ? `[${level}] ${now} [${this.position}]` : `[${level}] ${now}`
 	}
 
-	public info (...log: any[]) {
-		this._log('info', log)
+	public trace (...log: any[]) {
+		this._log('trace', log)
 	}
 
 	public debug (...log: any[]) {
 		this._log('debug', log)
+	}
+
+	public info (...log: any[]) {
+		this._log('info', log)
 	}
 
 	public warn (...log: any[]) {
@@ -50,5 +54,9 @@ export class Logger {
 
 	public error (...log: any[]) {
 		this._log('error', log)
+	}
+
+	public fatal (...log: any[]) {
+		this._log('fatal', log)
 	}
 }
