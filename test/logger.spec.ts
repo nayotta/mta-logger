@@ -4,14 +4,16 @@ test('basic', () => {
 	const logger = new Logger({
 		level: 'info',
 		position: 'test',
-		timeFormat: 'YYYY/MM/DD HH:mm:ss'
+		timeFormat: 'YYYY/MM/DD HH:mm:ss',
+		mark: true,
+		markId: 'mark-id'
 	})
 	expect(logger.level).toBe('info')
 	expect(logger.timeFormat).toBe('YYYY/MM/DD HH:mm:ss')
 
 	// log prefix
 	const logPrefix = logger.buildPrefix('warn')
-	expect(/^\[warn\].+\[test\]$/.test(logPrefix)).toBe(true)
+	expect(/^\[warn\]\s\d{4}\/\d{2}\/\d{2}\s\d{2}:\d{2}:\d{2}\s\[test\]\s\[mark-id\]$/.test(logPrefix)).toBe(true)
 })
 
 test('without position', () => {

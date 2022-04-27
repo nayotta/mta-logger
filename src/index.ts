@@ -8,14 +8,20 @@ export class Logger {
 	public level: string
 	public position: string = ''
 	public timeFormat: string = 'YYYY-MM-DDTHH:mm:ss:SSS'
+	public mark: boolean
+	public markId: string|number
 
 	constructor (option: {
 		level: TLevel,
 		position?: string,
-		timeFormat?: string
+		timeFormat?: string,
+		mark?: boolean
+		markId?: string|number
 	}) {
 		this.level = option.level
 		this.currentLevelIndex = this.levels.findIndex(item => item === option.level)
+		this.mark = !!option.mark
+		this.markId = option.markId || parseInt((Math.random() * 100000).toString())
 		if (option.position) this.position = option.position
 		if (option.timeFormat) this.timeFormat = option.timeFormat
 	}
@@ -33,7 +39,10 @@ export class Logger {
 	public buildPrefix (level: string): string {
 		if (!this.doLevelCheck(level)) return ''
 		const now = dayjs().format(this.timeFormat)
-		return this.position ? `[${level}] ${now} [${this.position}]` : `[${level}] ${now}`
+		let prefix = `[${level}] ${now}`
+		if (this.position) prefix += ` [${this.position}]`
+		if (this.mark) prefix += ` [${this.markId}]`
+		return prefix
 	}
 
 	public trace (...log: any[]) {

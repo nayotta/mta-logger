@@ -14,6 +14,14 @@ jobs:
           node-version: '16.x'
           registry-url: 'https://registry.npmjs.org'
           scope: '@nayotta'
+      - uses: little-core-labs/get-git-tag@v3.0.1
+        id: tagName
+        with:
+          tagRegex: "v(.*)"
+      - run: |-
+          cat package.json | jq --arg arg1 "${GIT_TAG_NAME}" '.version |= $arg1' > package.json.tmp && mv package.json.tmp package.json
+          echo './package.json'
+          cat package.json | grep version
       - run: npm install
       - run: npm run lint
       - run: npm run build
@@ -30,6 +38,14 @@ jobs:
           node-version: '16.x'
           registry-url: 'https://npm.pkg.github.com'
           scope: '@nayotta'
+      - uses: little-core-labs/get-git-tag@v3.0.1
+        id: tagName
+        with:
+          tagRegex: "v(.*)"
+      - run: |-
+          cat package.json | jq --arg arg1 "${GIT_TAG_NAME}" '.version |= $arg1' > package.json.tmp && mv package.json.tmp package.json
+          echo './package.json'
+          cat package.json | grep version
       - run: npm install
       - run: npm run lint
       - run: npm run build
