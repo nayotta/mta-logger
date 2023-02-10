@@ -2,41 +2,23 @@ import { Logger } from '../src'
 
 test('basic', () => {
 	const logger = new Logger({
-		level: 'info',
-		position: 'test',
-		timeFormat: 'YYYY/MM/DD HH:mm:ss',
-		mark: true,
-		markId: 'mark-id'
+		level: 'info'
 	})
 	expect(logger.level).toBe('info')
-	expect(logger.timeFormat).toBe('YYYY/MM/DD HH:mm:ss')
 
 	// log prefix
 	const logPrefix = logger.buildPrefix('warn')
-	expect(/^\[warn\]\s\d{4}\/\d{2}\/\d{2}\s\d{2}:\d{2}:\d{2}\s\[test\]\s\[mark-id\]$/.test(logPrefix)).toBe(true)
+	console.log('prefix:', logPrefix)
+	expect(/^WARN\[\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}\.\d{1,}\]$/.test(logPrefix)).toBe(true)
 })
 
 test('without position', () => {
 	const logger = new Logger({
-		level: 'all',
-		timeFormat: 'YYYY/MM/DD HH:mm:ss'
+		level: 'trace'
 	})
 
 	const logPrefix = logger.buildPrefix('warn') as string
 	expect(/^\[warn\].+\[.+\]$/.test(logPrefix)).toBe(false)
-})
-
-test('level [all]', () => {
-	const logger = new Logger({
-		level: 'all'
-	})
-	expect(logger.level).toBe('all')
-
-	const logLevels = ['trace', 'debug', 'info', 'warn', 'error', 'fatal']
-	for (let i = 0; i < logLevels.length; i++) {
-		const levelPass = logger.doLevelCheck(logLevels[i])
-		expect(levelPass).toBe(true)
-	}
 })
 
 test('level [trace]', () => {

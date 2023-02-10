@@ -10,12 +10,15 @@
 import { Logger } from '@nayotta/mta-logger'
 
 const logger = new Logger({
-	level: 'all',
-	position: 'init app'
+	level: 'debug',
+	colorful: true
+}).withFields({
+	'#instance': 'app',
+	'#method': 'init'
 })
 
 logger.info('app start on port', 8080)
 
 // print
-// [info] 2021-10-13T15:20:19:042 [init app] app start on port 8080
+// INFO[2021-10-13T15:20:19:042] app start on port 8080 #instance=app #method=init
 ```
