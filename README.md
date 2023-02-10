@@ -2,7 +2,13 @@
 
 [![Build and Lint](https://github.com/nayotta/mta-logger/actions/workflows/build-and-lint.yml/badge.svg)](https://github.com/nayotta/mta-logger/actions/workflows/build.yml)[![Node.js Package](https://github.com/nayotta/mta-logger/actions/workflows/release.yml/badge.svg)](https://github.com/nayotta/mta-logger/actions/workflows/release.yml)
 
-> A javascript logger module.
+> A simple typescript/javascript logger module.
+
+## install
+
+```sh
+$ npm install @nayotta/mta-logger --save
+```
 
 ## example
 

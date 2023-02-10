@@ -24,7 +24,7 @@ export class Logger {
 
 	public level: TLevel
 	public timeFormatFn: TTimeFormatFn = formatTime
-	public colorful: boolean = false
+	public colorful: boolean = true
 	public levelAbbrs: {
 		[lvl: string]: string
 	} = {

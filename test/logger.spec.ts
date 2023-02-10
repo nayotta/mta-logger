@@ -2,7 +2,8 @@ import { Logger } from '../src'
 
 test('basic', () => {
 	const logger = new Logger({
-		level: 'info'
+		level: 'info',
+		colorful: false
 	})
 	expect(logger.level).toBe('info')
 
