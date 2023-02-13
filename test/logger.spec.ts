@@ -9,7 +9,6 @@ test('basic', () => {
 
 	// log prefix
 	const logPrefix = logger.buildPrefix('warn')
-	console.log('prefix:', logPrefix)
 	expect(/^WARN\[\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}\.\d{1,}\]$/.test(logPrefix)).toBe(true)
 })
 
