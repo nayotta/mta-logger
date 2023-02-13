@@ -16,8 +16,7 @@ $ npm install @nayotta/mta-logger --save
 import { Logger } from '@nayotta/mta-logger'
 
 const logger = new Logger({
-	level: 'debug',
-	colorful: true
+	level: 'debug'
 }).withFields({
 	'#instance': 'app',
 	'#method': 'init'

@@ -1,17 +1,11 @@
+import { TFields, TLevel, TTimeFormatFn } from './type'
+import { ILogger } from './interface'
 import { formatTime } from './time'
 
-export type TLevel = 'trace'|'debug'|'info'|'warn'|'error'|'fatal'|'off'
-
-export type TTimeFormatFn = (time: Date) => string
-
-export type TFields = {
-	[field: string]: string|number|boolean
-}
-
-export class Logger {
-	private levels: TLevel[] = ['trace', 'debug', 'info', 'warn', 'error', 'fatal', 'off']
-	private currentLevelIndex: number
-	private colorTmpls: {
+export class Logger implements ILogger {
+	protected levels: TLevel[] = ['trace', 'debug', 'info', 'warn', 'error', 'fatal', 'off']
+	protected currentLevelIndex: number
+	protected colorTmpls: {
 		[lvl: string]: string
 	} = {
 		trace: '\x1b[90m%s\x1b[0m',
@@ -22,10 +16,8 @@ export class Logger {
 		fatal: '\x1b[31m%s\x1b[0m'
 	}
 
-	public level: TLevel
-	public timeFormatFn: TTimeFormatFn = formatTime
-	public colorful: boolean = true
-	public levelAbbrs: {
+	protected timeFormatFn: TTimeFormatFn = formatTime
+	protected levelAbbrs: {
 		[lvl: string]: string
 	} = {
 		trace: 'TRAC',
@@ -36,6 +28,8 @@ export class Logger {
 		fatal: 'FATA'
 	}
 
+	public level: TLevel
+	public colorful: boolean = true
 	public fields: TFields = {}
 	public err: Error | undefined
 
@@ -54,7 +48,7 @@ export class Logger {
 		if (option.colorful !== undefined) this.colorful = option.colorful
 	}
 
-	private _log (level: string, log?: any[]): void {
+	protected _log (level: string, log?: any[]): void {
 		if (!this.doLevelCheck(level)) return
 		console.log(
 			this.buildPrefix(level), ...(log || []),
@@ -63,12 +57,12 @@ export class Logger {
 		)
 	}
 
-	public doLevelCheck (level: string) {
+	protected doLevelCheck (level: string) {
 		const logLevel = this.levels.findIndex(item => item === level)
 		return logLevel >= this.currentLevelIndex
 	}
 
-	public buildPrefix (level: string): string {
+	protected buildPrefix (level: string): string {
 		if (!this.doLevelCheck(level)) return ''
 		let levelStr = `${this.levelAbbrs[level] ? this.levelAbbrs[level] : level}`
 		if (this.colorful) {
@@ -78,12 +72,12 @@ export class Logger {
 		return `${levelStr}[${now}]`
 	}
 
-	public buildColorFont (str: string, level: string) {
+	protected buildColorFont (str: string, level: string): string {
 		const tmpl = this.colorTmpls[level]
 		return tmpl ? tmpl.replace('%s', `${str}`) : str
 	}
 
-	public buildFields (fields: TFields, level: string): string {
+	protected buildFields (fields: TFields, level: string): string {
 		return Object.entries(fields).map(item => {
 			let keyStr = item[0]
 			if (this.colorful) {
@@ -94,11 +88,31 @@ export class Logger {
 		}).join(' ').replace(/\s$/, '')
 	}
 
-	public buildErr (err: Error, level: string) {
+	protected buildErr (err: Error, level: string): string {
 		return err ? `${this.buildColorFont('error', level)}="${err.message}"` : ''
 	}
 
-	public withField (field: string, value: string|number|boolean) {
+	public withLevel (level: TLevel): Logger {
+		return new Logger({
+			level: level,
+			timeFormatFn: this.timeFormatFn,
+			colorful: this.colorful,
+			fields: this.fields,
+			err: this.err
+		})
+	}
+
+	public withColorful (colorful: boolean): Logger {
+		return new Logger({
+			level: this.level,
+			timeFormatFn: this.timeFormatFn,
+			colorful: colorful,
+			fields: this.fields,
+			err: this.err
+		})
+	}
+
+	public withField (field: string, value: string|number|boolean): Logger {
 		return new Logger({
 			level: this.level,
 			timeFormatFn: this.timeFormatFn,
@@ -106,11 +120,12 @@ export class Logger {
 			fields: {
 				...this.fields,
 				[field]: value
-			}
+			},
+			err: this.err
 		})
 	}
 
-	public withFields (fields: TFields) {
+	public withFields (fields: TFields): Logger {
 		return new Logger({
 			level: this.level,
 			timeFormatFn: this.timeFormatFn,
@@ -118,11 +133,12 @@ export class Logger {
 			fields: {
 				...this.fields,
 				...fields
-			}
+			},
+			err: this.err
 		})
 	}
 
-	public withError (err: Error) {
+	public withError (err: Error): Logger {
 		return new Logger({
 			level: this.level,
 			timeFormatFn: this.timeFormatFn,
@@ -132,27 +148,27 @@ export class Logger {
 		})
 	}
 
-	public trace (...log: any[]) {
+	public trace (...log: any[]): void {
 		this._log('trace', log)
 	}
 
-	public debug (...log: any[]) {
+	public debug (...log: any[]): void {
 		this._log('debug', log)
 	}
 
-	public info (...log: any[]) {
+	public info (...log: any[]): void {
 		this._log('info', log)
 	}
 
-	public warn (...log: any[]) {
+	public warn (...log: any[]): void {
 		this._log('warn', log)
 	}
 
-	public error (...log: any[]) {
+	public error (...log: any[]): void {
 		this._log('error', log)
 	}
 
-	public fatal (...log: any[]) {
+	public fatal (...log: any[]): void {
 		this._log('fatal', log)
 	}
 }
