@@ -7,3 +7,5 @@ export type TFieldValue = string|number|boolean
 export type TFields = {
 	[field: string]: TFieldValue
 }
+
+export type TLogFValue = string|number|boolean

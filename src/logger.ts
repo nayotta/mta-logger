@@ -1,4 +1,4 @@
-import { TFields, TLevel, TTimeFormatFn } from './type'
+import { TFields, TLevel, TLogFValue, TTimeFormatFn } from './type'
 import { ILogger } from './interface'
 import { formatTime } from './time'
 
@@ -30,6 +30,7 @@ export class Logger implements ILogger {
 
 	public level: TLevel
 	public colorful: boolean = true
+	public logfMinCharLen: number = 32
 	public fields: TFields = {}
 	public err: Error | undefined
 
@@ -39,6 +40,7 @@ export class Logger implements ILogger {
 		fields?: TFields
 		err?: Error
 		colorful?: boolean
+		logfMinCharLen?: number
 	}) {
 		this.level = option.level
 		this.currentLevelIndex = this.levels.findIndex(item => item === option.level)
@@ -46,6 +48,7 @@ export class Logger implements ILogger {
 		if (option.fields !== undefined) this.fields = option.fields
 		if (option.err !== undefined) this.err = option.err
 		if (option.colorful !== undefined) this.colorful = option.colorful
+		if (option.logfMinCharLen !== undefined) this.logfMinCharLen = option.logfMinCharLen
 	}
 
 	protected _log (level: string, log?: any[]): void {
@@ -170,5 +173,49 @@ export class Logger implements ILogger {
 
 	public fatal (...log: any[]): void {
 		this._log('fatal', log)
+	}
+
+	protected _logf (level: string, tmpl: string, args?: TLogFValue[]): void {
+		if (!this.doLevelCheck(level)) return
+		console.log(
+			this.buildPrefix(level),
+			this._buildLogTmpl(tmpl, args),
+			this.buildFields(this.fields, level),
+			this.err && this.err instanceof Error ? this.buildErr(this.err, 'error') : ''
+		)
+	}
+
+	protected _buildLogTmpl (tmpl: string, args?: TLogFValue[]): string {
+		let out = tmpl
+		if (args && args.length > 0) {
+			args.forEach(item => {
+				out = out.replace(/%s/, item.toString())
+			})
+		}
+		return out.length < this.logfMinCharLen ? out.padEnd(this.logfMinCharLen, ' ') : out
+	}
+
+	public tracef (tmpl: string, ...args: TLogFValue[]): void {
+		this._logf('trace', tmpl, args)
+	}
+
+	public debugf (tmpl: string, ...args: TLogFValue[]): void {
+		this._logf('debug', tmpl, args)
+	}
+
+	public infof (tmpl: string, ...args: TLogFValue[]): void {
+		this._logf('info', tmpl, args)
+	}
+
+	public warnf (tmpl: string, ...args: TLogFValue[]): void {
+		this._logf('warn', tmpl, args)
+	}
+
+	public errorf (tmpl: string, ...args: TLogFValue[]): void {
+		this._logf('error', tmpl, args)
+	}
+
+	public fatalf (tmpl: string, ...args: TLogFValue[]): void {
+		this._logf('fatal', tmpl, args)
 	}
 }

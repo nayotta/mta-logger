@@ -26,4 +26,9 @@ logger.info('app start on port', 8080)
 
 // print
 // INFO[2021-10-13T15:20:19:042] app start on port 8080 #instance=app #method=init
+
+logger.infof('app start on port %s', 8080)
+
+// print
+// INFO[2021-10-13T15:20:19:042] app start on port 8080 #instance=app #method=init
 ```

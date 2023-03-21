@@ -1,9 +1,10 @@
-import { TFieldValue, TFields, TLevel } from './type'
+import { TFieldValue, TFields, TLevel, TLogFValue } from './type'
 
 export interface ILogger {
 	// properties
 	level: TLevel
 	colorful: boolean
+	logfMinCharLen: number
 	fields: TFields
 	err: Error|undefined
 
@@ -19,4 +20,10 @@ export interface ILogger {
 	warn (...log: any[]): void
 	error (...log: any[]): void
 	fatal (...log: any[]): void
+	tracef (tmpl: string, ...args: TLogFValue[]): void
+	debugf (tmpl: string, ...args: TLogFValue[]): void
+	infof (tmpl: string, ...args: TLogFValue[]): void
+	warnf (tmpl: string, ...args: TLogFValue[]): void
+	errorf (tmpl: string, ...args: TLogFValue[]): void
+	fatalf (tmpl: string, ...args: TLogFValue[]): void
 }

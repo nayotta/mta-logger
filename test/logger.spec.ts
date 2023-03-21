@@ -1,4 +1,4 @@
-import { Logger } from '../src'
+import { Logger, TLogFValue } from '../src'
 
 class TestLogger extends Logger {
 	public testBuildPrefix (level: string): string {
@@ -7,6 +7,10 @@ class TestLogger extends Logger {
 
 	public testDoLevelCheck (level: string): boolean {
 		return this.doLevelCheck(level)
+	}
+
+	public testBuildLogTmpl (tmpl: string, ...args: TLogFValue[]): string {
+		return this._buildLogTmpl(tmpl, args)
 	}
 }
 
@@ -155,4 +159,19 @@ test('level [off]', () => {
 			expect(levelPass).toBe(false)
 		}
 	}
+})
+
+test('logf tmpl', () => {
+	const logger = new TestLogger({
+		level: 'debug',
+		logfMinCharLen: 48
+	})
+
+	const tmpl = 'this is just for %s, it should be %s.'
+	const tmplf1 = logger.testBuildLogTmpl(tmpl, 'test', 'worked')
+	expect(tmplf1).toBe('this is just for test, it should be worked.     ')
+
+	logger.logfMinCharLen = 32
+	const tmplf2 = logger.testBuildLogTmpl(tmpl, 'test', 'worked')
+	expect(tmplf2).toBe('this is just for test, it should be worked.')
 })
