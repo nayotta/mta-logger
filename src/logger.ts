@@ -189,7 +189,7 @@ export class Logger implements ILogger {
 		let out = tmpl
 		if (args && args.length > 0) {
 			args.forEach(item => {
-				out = out.replace(/%s/, item.toString())
+				out = out.replace(/%s/, `${item}`)
 			})
 		}
 		return out.length < this.logfMinCharLen ? out.padEnd(this.logfMinCharLen, ' ') : out

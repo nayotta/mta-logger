@@ -174,4 +174,10 @@ test('logf tmpl', () => {
 	logger.logfMinCharLen = 32
 	const tmplf2 = logger.testBuildLogTmpl(tmpl, 'test', 'worked')
 	expect(tmplf2).toBe('this is just for test, it should be worked.')
+
+	const tmplf3 = logger.testBuildLogTmpl(tmpl, 'test', undefined as any)
+	expect(tmplf3).toBe('this is just for test, it should be undefined.')
+
+	const tmplf4 = logger.testBuildLogTmpl(tmpl, 'test', null as any)
+	expect(tmplf4).toBe('this is just for test, it should be null.')
 })
