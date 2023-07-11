@@ -43,7 +43,7 @@ export class Logger implements ILogger {
 			fields: this.fields
 		}
 		this.hooks.forEach(hook => {
-			if (hook.triggeredLevels.includes(level)) {
+			if (hook.levels.includes(level)) {
 				hook.callback(logItem)
 			}
 		})
@@ -167,7 +167,7 @@ export class Logger implements ILogger {
 			fields: this.fields
 		}
 		this.hooks.forEach(hook => {
-			if (hook.triggeredLevels.includes(level)) {
+			if (hook.levels.includes(level)) {
 				hook.callback(logItem)
 			}
 		})

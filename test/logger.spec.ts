@@ -250,7 +250,7 @@ test('log hook', () => {
 			method: 'test'
 		}
 	}).addLogHooks([{
-		triggeredLevels: ['error', 'fatal', 'panic'],
+		levels: ['error', 'fatal', 'panic'],
 		callback: async function (logItem) {
 			logi = logItem
 			return {

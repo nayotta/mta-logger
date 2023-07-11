@@ -10,7 +10,9 @@
 $ npm install @nayotta/mta-logger --save
 ```
 
-## example
+## use
+
+log levels: `trace`, `debug`, `info`, `warn`, `error`, `fatal`, `panic`, `off`.
 
 ### inside formats
 
@@ -41,7 +43,7 @@ logger.info('app start on port', 8080)
 logger.infof('app start on port %s', 8080)
 
 // default print
-// INFO[2021-10-13T15:20:19:042] app start on port 8080 #instance=app #method=init
+// INFO[2021-10-13T15:20:19:042] app start on port 8080           #instance=app #method=init
 
 // json print
 // {"level":"info","time":"2023-07-10 15:18:38.7","#instance":"app","#method":"init","msg":"app start on port 8080"}
@@ -61,7 +63,7 @@ import { Logger, TLogItem formats } from '@nayotta/mta-logger'
 const logger = new Logger({
 	level: 'debug',
 	format: function (logItem: TLogItem) {
-		const out: string[] = []
+		const out: any[] = []
 		const { level, time, error, logs, fields, colorful } = logItem
 		// TODO: build your own custom log format
 		// like:
@@ -76,6 +78,7 @@ const logger = new Logger({
 		for (const key in fields) {
 			out.push(`${key}=${fields[key]}`)
 		}
+		// console.log(...out)
 		return out
 	}
 }).withFields({
@@ -104,7 +107,7 @@ import { Logger, TLogItem formats } from '@nayotta/mta-logger'
 const logger = new Logger({
 	level: 'debug'
 }).addLogHooks([{
-	triggeredLevels: ['error', 'fatal', 'panic'],
+	levels: ['error', 'fatal', 'panic'],
 	callback: async function (logItem: TLogItem) {
 		// TODO: do something
 		console.log('send error message with log item:', logItem)

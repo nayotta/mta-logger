@@ -29,7 +29,7 @@ export type TLogFn = (...log: any[]) => void
 export type TLogFFn = (tmpl: string, ...args: TLogFValue[]) => void
 
 export type TLogFnHook = {
-	triggeredLevels: TLevel[]
+	levels: TLevel[]
 	callback: (logItem: TLogItem) => void
 }
 

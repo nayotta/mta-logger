@@ -9,7 +9,8 @@ const colorTmpls: {
 	info: '\x1b[36m%s\x1b[0m',
 	warn: '\x1b[33m%s\x1b[0m',
 	error: '\x1b[31m%s\x1b[0m',
-	fatal: '\x1b[31m%s\x1b[0m'
+	fatal: '\x1b[31m%s\x1b[0m',
+	panic: '\x1b[31m%s\x1b[0m'
 }
 
 const levelAbbrs: {
@@ -20,7 +21,8 @@ const levelAbbrs: {
 	info: 'INFO',
 	warn: 'WARN',
 	error: 'ERRO',
-	fatal: 'FATA'
+	fatal: 'FATA',
+	panic: 'PANI'
 }
 
 function buildColorFont (str: string, level: string): string {
