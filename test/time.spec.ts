@@ -1,8 +1,8 @@
-import { formatTime } from '../src/time'
+import { formatTime } from '../src/time.js'
 
 test('basic', () => {
-	const s = '2023-02-12 10:32:43.322'
+	const s = '2006-01-02 15:04:05.000'
 	const d = new Date(s)
 	const dS = formatTime(d)
-	expect(dS).toBe(s)
+	expect(/^2006-01-02T15:04:05\.000/.test(dS)).toBe(true)
 })

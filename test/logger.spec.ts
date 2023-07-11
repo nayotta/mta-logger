@@ -1,4 +1,4 @@
-import { Logger, TLevel, TLogFValue, TLogItem, formats } from '../src'
+import { Logger, TLevel, TLogFValue, TLogItem, formats } from '../src/index.js'
 
 class TestLogger extends Logger {
 	public testDoLevelCheck (level: string): boolean {
@@ -216,7 +216,12 @@ test('json format', () => {
 	expect(logArgs).toBeDefined()
 	if (!logArgs) throw new Error('failed to build log args')
 	expect(logArgs.length).toBe(1)
-	expect(/^\{"level":"debug","time":".+","method":"test","module":"module 1","msg":"test"\}/.test(logArgs[0])).toBe(true)
+	const json = JSON.parse(logArgs[0])
+	expect(json.level).toBe('debug')
+	expect(json.method).toBe('test')
+	expect(json.module).toBe('module 1')
+	expect(json.msg).toBe('test')
+	expect(new Date(json.time).toString()).not.toEqual('Invalid Date')
 })
 
 test('test format', () => {
@@ -234,7 +239,7 @@ test('test format', () => {
 	expect(logArgs).toBeDefined()
 	if (!logArgs) throw new Error('failed to build log args')
 	expect(logArgs.length).toBe(1)
-	expect(/^level=debug time=".+" msg=test method=test module="module 1"/.test(logArgs[0])).toBe(true)
+	expect(/^level=debug time=.+ msg=test method=test module="module 1"/.test(logArgs[0])).toBe(true)
 })
 
 test('log hook', () => {

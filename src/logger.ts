@@ -1,5 +1,5 @@
-import { ILogger, TAddLogFnHooks, TFields, TLevel, TLogFFn, TLogFValue, TLogFn, TLogFnHook, TLogFormatFn } from './interface'
-import { formats } from './format'
+import { ILogger, TAddLogFnHooks, TFields, TLevel, TLogFFn, TLogFValue, TLogFn, TLogFnHook, TLogFormatFn } from './interface.js'
+import { formats } from './format.js'
 
 export class Logger implements ILogger {
 	private levels: TLevel[] = ['trace', 'debug', 'info', 'warn', 'error', 'fatal', 'panic', 'off']

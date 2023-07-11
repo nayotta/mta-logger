@@ -1,5 +1,5 @@
-import { TLevel, TLogFormatFn } from './interface'
-import { formatTime } from './time'
+import { TLevel, TLogFormatFn } from './interface.js'
+import { formatTime } from './time.js'
 
 const colorTmpls: {
 	[lvl: string]: string

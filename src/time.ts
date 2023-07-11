@@ -1,34 +1,35 @@
 export function formatTime (date: Date|number|string) {
 	if (!date) return ''
-	const dateFormat = new Date(date)
-	if (!dateFormat) return ''
-	let out = 'YYYY-MM-DD hh:mm:ss.SSS'
-	const year = dateFormat.getFullYear()
-	const month = dateFormat.getMonth() + 1
-	const day = dateFormat.getDate()
-	const hour = dateFormat.getHours()
-	const minute = dateFormat.getMinutes()
-	const second = dateFormat.getSeconds()
-	const milli = dateFormat.getMilliseconds()
+	const d = new Date(date)
+	if (!d) return ''
+	const year = d.getFullYear()
+	const month = d.getMonth() + 1
+	const day = d.getDate()
+	const hour = d.getHours()
+	const minute = d.getMinutes()
+	const second = d.getSeconds()
+	const milli = d.getMilliseconds()
+	const offset = getTimezone(d)
 
-	out = out.replace(/YYYY/g, `${year}`)
-		.replace(/YY/g, year.toString().substring(year.toString().length - 2))
-		.replace(/MM/g, formatDateNumber(`${month}`))
-		.replace(/M/g, `${month}`)
-		.replace(/DD/g, formatDateNumber(`${day}`))
-		.replace(/D/g, `${day}`)
-		.replace(/hh/g, formatDateNumber(`${hour}`))
-		.replace(/h/g, `${hour}`)
-		.replace(/mm/g, formatDateNumber(`${minute}`))
-		.replace(/m/g, `${minute}`)
-		.replace(/ss/g, formatDateNumber(`${second}`))
-		.replace(/s/g, `${second}`)
-		.replace(/SSS/g, `${milli}`)
-
-	return out
+	return `${year}-${formatDateNumber(month)}-${formatDateNumber(day)}T${formatDateNumber(hour)}:${formatDateNumber(minute)}:${formatDateNumber(second)}.${formatDateNumber(milli, 3)}${offset}`
 }
 
-const formatDateNumber = (n: number|string) => {
+function getTimezone (time: Date): string {
+	const offset = time.getTimezoneOffset()
+	const offsetOp = offset < 0 ? '+' : '-'
+	const offsetHour = formatDateNumber(Math.abs(offset) / 60)
+	const offsetMin = formatDateNumber(Math.abs(offset) % 60)
+	return `${offsetOp}${offsetHour}:${offsetMin}`
+}
+
+function formatDateNumber (n: number|string, len?: number): string {
 	n = n.toString()
-	return n[1] ? n : '0' + n
+	len = len || 2
+	if (n.length < len) {
+		const nlen = n.length
+		for (let i = 0; i < len - nlen; i++) {
+			n = `0${n}`
+		}
+	}
+	return n
 }
