@@ -2,10 +2,10 @@ import { ILogger, TAddLogFnHooks, TFields, TLevel, TLogFFn, TLogFValue, TLogFn, 
 import { formats } from './format'
 
 export class Logger implements ILogger {
-	protected levels: TLevel[] = ['trace', 'debug', 'info', 'warn', 'error', 'fatal', 'panic', 'off']
-	protected currentLevelIndex: number
-	protected format: TLogFormatFn = formats.default
-	protected hooks: TLogFnHook[] = []
+	private levels: TLevel[] = ['trace', 'debug', 'info', 'warn', 'error', 'fatal', 'panic', 'off']
+	private currentLevelIndex: number
+	private format: TLogFormatFn = formats.default
+	private hooks: TLogFnHook[] = []
 
 	public level: TLevel
 	public colorful: boolean = true
@@ -61,7 +61,7 @@ export class Logger implements ILogger {
 		return logLevel >= this.currentLevelIndex
 	}
 
-	public withLevel (level: TLevel): ILogger {
+	public withLevel (level: TLevel): Logger {
 		return new Logger({
 			level: level,
 			format: this.format,
@@ -73,7 +73,7 @@ export class Logger implements ILogger {
 		})
 	}
 
-	public withColorful (colorful: boolean): ILogger {
+	public withColorful (colorful: boolean): Logger {
 		return new Logger({
 			level: this.level,
 			format: this.format,
@@ -85,7 +85,7 @@ export class Logger implements ILogger {
 		})
 	}
 
-	public withField (field: string, value: string|number|boolean): ILogger {
+	public withField (field: string, value: string|number|boolean): Logger {
 		return new Logger({
 			level: this.level,
 			format: this.format,
@@ -100,7 +100,7 @@ export class Logger implements ILogger {
 		})
 	}
 
-	public withFields (fields: TFields): ILogger {
+	public withFields (fields: TFields): Logger {
 		return new Logger({
 			level: this.level,
 			format: this.format,
@@ -115,7 +115,7 @@ export class Logger implements ILogger {
 		})
 	}
 
-	public withError (err: Error): ILogger {
+	public withError (err: Error): Logger {
 		return new Logger({
 			level: this.level,
 			format: this.format,

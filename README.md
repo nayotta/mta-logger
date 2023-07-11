@@ -50,7 +50,6 @@ logger.infof('app start on port %s', 8080)
 
 // text print
 // level=info time="2023-07-10 15:22:44.513" msg="app start on port 8080" #instance=app #method=init
-
 ```
 
 ### custom format
