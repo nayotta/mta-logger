@@ -8,7 +8,7 @@ export class Logger implements ILogger {
 	private hooks: TLogFnHook[] = []
 
 	public level: TLevel
-	public colorful: boolean = true
+	public colorful: boolean = false
 	public logfMinCharLen: number = 32
 	public fields: TFields = {}
 	public err: Error | undefined
