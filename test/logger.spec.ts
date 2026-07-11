@@ -1,3 +1,4 @@
+/// <reference types="jest" />
 import { Logger, TLevel, TLogFValue, TLogItem, formats } from '../src/index.js'
 
 class TestLogger extends Logger {
@@ -273,4 +274,491 @@ test('log hook', () => {
 	expect(logi.level).toBe('panic')
 	logger.debug('test')
 	expect(logi.level).toBe('panic')
+})
+
+test('logf tmpl with %d integer format', () => {
+	const logger = new TestLogger({
+		level: 'debug',
+		logfMinCharLen: 0
+	})
+
+	expect(logger.testBuildLogTmpl('count: %d', 42)).toBe('count: 42')
+	expect(logger.testBuildLogTmpl('count: %d', -1)).toBe('count: -1')
+	expect(logger.testBuildLogTmpl('count: %d', 0)).toBe('count: 0')
+	expect(logger.testBuildLogTmpl('count: %i', 99)).toBe('count: 99')
+})
+
+test('logf tmpl with %f float format', () => {
+	const logger = new TestLogger({
+		level: 'debug',
+		logfMinCharLen: 0
+	})
+
+	expect(logger.testBuildLogTmpl('value: %f', 3.14)).toBe('value: 3.14')
+	expect(logger.testBuildLogTmpl('value: %.2f', 3.14159)).toBe('value: 3.14')
+	expect(logger.testBuildLogTmpl('value: %.0f', 3.9)).toBe('value: 4')
+})
+
+test('logf tmpl with %x/%X hex format', () => {
+	const logger = new TestLogger({
+		level: 'debug',
+		logfMinCharLen: 0
+	})
+
+	expect(logger.testBuildLogTmpl('hex: %x', 255)).toBe('hex: ff')
+	expect(logger.testBuildLogTmpl('hex: %X', 255)).toBe('hex: FF')
+	expect(logger.testBuildLogTmpl('hex: %04x', 10)).toBe('hex: 000a')
+})
+
+test('logf tmpl with %o octal format', () => {
+	const logger = new TestLogger({
+		level: 'debug',
+		logfMinCharLen: 0
+	})
+
+	expect(logger.testBuildLogTmpl('oct: %o', 8)).toBe('oct: 10')
+	expect(logger.testBuildLogTmpl('oct: %o', 10)).toBe('oct: 12')
+})
+
+test('logf tmpl with %% literal percent', () => {
+	const logger = new TestLogger({
+		level: 'debug',
+		logfMinCharLen: 0
+	})
+
+	expect(logger.testBuildLogTmpl('%.2f%%', 87.654)).toBe('87.65%')
+	expect(logger.testBuildLogTmpl('%%%s', 'hello')).toBe('%hello')
+})
+
+test('logf tmpl with width and alignment', () => {
+	const logger = new TestLogger({
+		level: 'debug',
+		logfMinCharLen: 0
+	})
+
+	expect(logger.testBuildLogTmpl('[%10s]', 'hi')).toBe('[        hi]')
+	expect(logger.testBuildLogTmpl('[%-10s]', 'hi')).toBe('[hi        ]')
+	expect(logger.testBuildLogTmpl('[%04d]', 7)).toBe('[0007]')
+})
+
+test('logf tmpl with %t boolean format', () => {
+	const logger = new TestLogger({
+		level: 'debug',
+		logfMinCharLen: 0
+	})
+
+	expect(logger.testBuildLogTmpl('enabled: %t', true)).toBe('enabled: true')
+	expect(logger.testBuildLogTmpl('enabled: %t', false)).toBe('enabled: false')
+})
+
+test('logf tmpl with mixed format specifiers', () => {
+	const logger = new TestLogger({
+		level: 'debug',
+		logfMinCharLen: 0
+	})
+
+	const result = logger.testBuildLogTmpl('%s has %d messages, %.2f%% done', 'Alice', 5, 87.654)
+	expect(result).toBe('Alice has 5 messages, 87.65% done')
+})
+
+test('logf tmpl with extra args (more args than placeholders)', () => {
+	const logger = new TestLogger({
+		level: 'debug',
+		logfMinCharLen: 0
+	})
+
+	const result = logger.testBuildLogTmpl('hello %s', 'world', 'extra', 'ignored')
+	expect(result).toBe('hello world')
+})
+
+test('logf tmpl without args', () => {
+	const logger = new TestLogger({
+		level: 'debug',
+		logfMinCharLen: 0
+	})
+
+	expect(logger.testBuildLogTmpl('no placeholders')).toBe('no placeholders')
+	expect(logger.testBuildLogTmpl('hello %s', undefined as any)).toBe('hello undefined')
+})
+
+test('logf tmpl with object arg via %s', () => {
+	const logger = new TestLogger({
+		level: 'debug',
+		logfMinCharLen: 0
+	})
+
+	const result = logger.testBuildLogTmpl('data: %s', { id: 1, name: 'test' })
+	// sprintf-js 会将对象转为字符串（通过 toString）
+	expect(result).toContain('data:')
+})
+
+test('logf tmpl respects logfMinCharLen padding', () => {
+	const logger = new TestLogger({
+		level: 'debug',
+		logfMinCharLen: 48
+	})
+
+	const result = logger.testBuildLogTmpl('short')
+	expect(result.length).toBe(48)
+	expect(result).toBe('short'.padEnd(48, ' '))
+})
+
+test('logf tmpl retains original %s behavior for backward compatibility', () => {
+	const logger = new TestLogger({
+		level: 'debug',
+		logfMinCharLen: 0
+	})
+
+	const result = logger.testBuildLogTmpl('this is just for %s, it should be %s.', 'test', 'worked')
+	expect(result).toBe('this is just for test, it should be worked.')
+})
+
+describe('withXxx immutability', () => {
+	test('withLevel returns new instance with updated level', () => {
+		const logger = new TestLogger({ level: 'debug' })
+		const derived = logger.withLevel('error')
+		expect(derived.level).toBe('error')
+		expect(logger.level).toBe('debug')
+		expect(derived).not.toBe(logger)
+	})
+
+	test('withColorful returns new instance with updated colorful', () => {
+		const logger = new TestLogger({ level: 'debug', colorful: false })
+		const derived = logger.withColorful(true)
+		expect(derived.colorful).toBe(true)
+		expect(logger.colorful).toBe(false)
+	})
+
+	test('withField returns new instance with added field', () => {
+		const logger = new TestLogger({ level: 'debug', fields: { a: '1' } })
+		const derived = logger.withField('b', '2')
+		expect(derived.fields).toEqual({ a: '1', b: '2' })
+		expect(logger.fields).toEqual({ a: '1' })
+	})
+
+	test('withFields returns new instance with merged fields', () => {
+		const logger = new TestLogger({ level: 'debug', fields: { a: '1' } })
+		const derived = logger.withFields({ b: '2', c: '3' })
+		expect(derived.fields).toEqual({ a: '1', b: '2', c: '3' })
+		expect(logger.fields).toEqual({ a: '1' })
+	})
+
+	test('withError returns new instance with error set', () => {
+		const logger = new TestLogger({ level: 'debug' })
+		const err = new Error('boom')
+		const derived = logger.withError(err)
+		expect(derived.err).toBe(err)
+		expect(logger.err).toBeUndefined()
+	})
+
+	test('withXxx chain preserves format and hooks', () => {
+		const logger = new TestLogger({
+			level: 'debug',
+			format: formats.json,
+			logfMinCharLen: 64,
+			logHooks: [{ levels: ['error'], callback: () => {} }]
+		})
+		const derived = logger.withLevel('warn').withField('x', 'y')
+		expect(derived.logfMinCharLen).toBe(64)
+		expect(derived.fields).toHaveProperty('x')
+	})
+})
+
+describe('default format edge cases', () => {
+	test('default format with error includes error message', () => {
+		const logger = new TestLogger({
+			level: 'error',
+			colorful: false,
+			logfMinCharLen: 0,
+			err: new Error('something went wrong')
+		})
+
+		const logArgs = logger.testBuildLogArgs('error', 'failed')
+		expect(logArgs).toBeDefined()
+		if (!logArgs) throw new Error('failed to build log args')
+
+		const joined = logArgs.join(' ')
+		expect(joined).toContain('something went wrong')
+	})
+
+	test('default format with no fields and no error', () => {
+		const logger = new TestLogger({
+			level: 'info',
+			colorful: false,
+			logfMinCharLen: 0
+		})
+
+		const logArgs = logger.testBuildLogArgs('info', 'minimal')
+		expect(logArgs).toBeDefined()
+		if (!logArgs) throw new Error('failed to build log args')
+		expect(logArgs[0]).toMatch(/^INFO\[.+\]$/)
+		expect(logArgs[1]).toBe('minimal')
+	})
+
+	test('default format with empty logs', () => {
+		const logger = new TestLogger({
+			level: 'debug',
+			colorful: false,
+			logfMinCharLen: 0
+		})
+
+		const logArgs = logger.testBuildLogArgs('debug')
+		expect(logArgs).toBeDefined()
+		if (!logArgs) throw new Error('failed to build log args')
+		expect(logArgs[0]).toMatch(/^DEBU\[.+\]$/)
+	})
+})
+
+describe('JSON and text format with error', () => {
+	test('json format includes error.message', () => {
+		const logger = new TestLogger({
+			level: 'error',
+			colorful: false,
+			format: formats.json,
+			err: new Error('json error')
+		})
+
+		const logArgs = logger.testBuildLogArgs('error', 'boom')
+		expect(logArgs).toBeDefined()
+		if (!logArgs) throw new Error('failed to build log args')
+
+		const json = JSON.parse(logArgs[0])
+		expect(json.error).toBe('json error')
+	})
+
+	test('text format includes error field', () => {
+		const logger = new TestLogger({
+			level: 'error',
+			colorful: false,
+			format: formats.text,
+			err: new Error('text error')
+		})
+
+		const logArgs = logger.testBuildLogArgs('error', 'boom')
+		expect(logArgs).toBeDefined()
+		if (!logArgs) throw new Error('failed to build log args')
+		expect(logArgs[0]).toContain('error="text error"')
+	})
+})
+
+describe('terminal ANSI colorful', () => {
+	test('default format has ANSI codes when colorful=true', () => {
+		const logger = new TestLogger({
+			level: 'debug',
+			colorful: true,
+			logfMinCharLen: 0
+		})
+
+		const logArgs = logger.testBuildLogArgs('debug', 'hello')
+		expect(logArgs).toBeDefined()
+		if (!logArgs) throw new Error('failed to build log args')
+		// eslint-disable-next-line no-control-regex
+		expect(logArgs[0]).toMatch(/\x1b\[\d+m/)
+	})
+
+	test('ANSI color differs by level', () => {
+		const debugLogger = new TestLogger({ level: 'debug', colorful: true, logfMinCharLen: 0 })
+		const errorLogger = new TestLogger({ level: 'error', colorful: true, logfMinCharLen: 0 })
+
+		const debugArgs = debugLogger.testBuildLogArgs('debug', 'test')
+		const errorArgs = errorLogger.testBuildLogArgs('error', 'test')
+
+		expect(debugArgs).toBeDefined()
+		expect(errorArgs).toBeDefined()
+		if (!debugArgs || !errorArgs) throw new Error('failed to build log args')
+
+		// eslint-disable-next-line no-control-regex
+		const debugCode = (debugArgs[0] as string).match(/\x1b\[(\d+)m/)
+		// eslint-disable-next-line no-control-regex
+		const errorCode = (errorArgs[0] as string).match(/\x1b\[(\d+)m/)
+		expect(debugCode).not.toBeNull()
+		expect(errorCode).not.toBeNull()
+		// debug=36(cyan), error=31(red)
+		expect(debugCode![1]).not.toBe(errorCode![1])
+	})
+})
+
+describe('sprintf additional format specifiers', () => {
+	test('logf tmpl with %b binary format', () => {
+		const logger = new TestLogger({ level: 'debug', logfMinCharLen: 0 })
+		expect(logger.testBuildLogTmpl('bin: %b', 5)).toBe('bin: 101')
+		expect(logger.testBuildLogTmpl('bin: %b', 10)).toBe('bin: 1010')
+	})
+
+	test('logf tmpl with %e scientific notation', () => {
+		const logger = new TestLogger({ level: 'debug', logfMinCharLen: 0 })
+		expect(logger.testBuildLogTmpl('sci: %e', 1000)).toBe('sci: 1e+3')
+		expect(logger.testBuildLogTmpl('sci: %e', 42)).toBe('sci: 4.2e+1')
+	})
+
+	test('logf tmpl with %u unsigned decimal', () => {
+		const logger = new TestLogger({ level: 'debug', logfMinCharLen: 0 })
+		expect(logger.testBuildLogTmpl('unsigned: %u', 42)).toBe('unsigned: 42')
+	})
+
+	test('logf tmpl with all specifier types combined', () => {
+		const logger = new TestLogger({ level: 'debug', logfMinCharLen: 0 })
+		const result = logger.testBuildLogTmpl(
+			'%s: dec=%d hex=0x%X bin=%b sci=%.2e', 'test', 255, 255, 7, 1234.5
+		)
+		expect(result).toBe('test: dec=255 hex=0xFF bin=111 sci=1.23e+3')
+	})
+})
+
+describe('log hooks edge cases', () => {
+	test('multiple hooks all fire for matching level', () => {
+		let count = 0
+		const logger = new TestLogger({ level: 'debug' })
+			.addLogHooks([
+				{ levels: ['error'], callback: () => { count++ } },
+				{ levels: ['error', 'fatal'], callback: () => { count++ } }
+			])
+
+		logger.error('test')
+		expect(count).toBe(2)
+	})
+
+	test('hook does not fire for non-matching level', () => {
+		let fired = false
+		const logger = new TestLogger({ level: 'debug' })
+			.addLogHooks([{ levels: ['error'], callback: () => { fired = true } }])
+
+		logger.info('test')
+		expect(fired).toBe(false)
+	})
+
+	test('addLogHooks returns ILogger for chaining', () => {
+		const logger = new TestLogger({ level: 'debug' })
+		const result = logger.addLogHooks([{ levels: ['info'], callback: () => {} }])
+		expect(result).toBe(logger)
+	})
+
+	test('hook receives complete logItem with fields and logs', () => {
+		let captured: TLogItem | null = null
+		const logger = new TestLogger({
+			level: 'debug',
+			fields: { service: 'test-svc' }
+		}).addLogHooks([{
+			levels: ['warn'],
+			callback: (logItem) => { captured = logItem }
+		}])
+
+		logger.warn('caution')
+		expect(captured).not.toBeNull()
+		expect(captured!.level).toBe('warn')
+		expect(captured!.fields).toEqual({ service: 'test-svc' })
+		expect(captured!.logs).toEqual(['caution'])
+	})
+})
+
+describe('browser colorful (%c CSS style)', () => {
+	const originalWindow = global.window as any
+
+	beforeEach(() => {
+		(global as any).window = { document: {} }
+	})
+
+	afterEach(() => {
+		(global as any).window = originalWindow
+	})
+
+	test('default format uses %c CSS in browser when colorful=true', () => {
+		const logger = new TestLogger({
+			level: 'debug',
+			colorful: true,
+			logfMinCharLen: 0,
+			fields: { method: 'test' }
+		})
+
+		const logArgs = logger.testBuildLogArgs('debug', 'hello')
+		expect(logArgs).toBeDefined()
+		if (!logArgs) throw new Error('failed to build log args')
+
+		// 第一个参数应包含 %c 标记
+		expect(logArgs[0]).toContain('%c')
+		// 应有 CSS 样式参数（color + reset 对）
+		const cssArgs = logArgs.slice(1)
+		expect(cssArgs.length).toBeGreaterThan(0)
+	})
+
+	test('default format has no %c when colorful=false in browser', () => {
+		const logger = new TestLogger({
+			level: 'debug',
+			colorful: false,
+			logfMinCharLen: 0,
+			fields: { method: 'test' }
+		})
+
+		const logArgs = logger.testBuildLogArgs('debug', 'hello')
+		expect(logArgs).toBeDefined()
+		if (!logArgs) throw new Error('failed to build log args')
+
+		expect(logArgs[0]).not.toContain('%c')
+	})
+
+	test('default format CSS args count matches %c markers when colorful=true', () => {
+		const logger = new TestLogger({
+			level: 'debug',
+			colorful: true,
+			logfMinCharLen: 0,
+			fields: { method: 'test', module: 'app' }
+		})
+
+		const logArgs = logger.testBuildLogArgs('debug', 'hello')
+		expect(logArgs).toBeDefined()
+		if (!logArgs) throw new Error('failed to build log args')
+
+		// CSS args are at the tail, each pair is ["color:...", ""]
+		// find the first "color:" arg (marks where CSS args begin)
+		let cssStartIdx = logArgs.length
+		for (let i = 0; i < logArgs.length; i++) {
+			if (typeof logArgs[i] === 'string' && (logArgs[i] as string).startsWith('color:')) {
+				cssStartIdx = i
+				break
+			}
+		}
+
+		// count %c in message portion only
+		let cCount = 0
+		for (let i = 0; i < cssStartIdx; i++) {
+			if (typeof logArgs[i] === 'string') {
+				cCount += ((logArgs[i] as string).match(/%c/g) || []).length
+			}
+		}
+		const cssArgs = logArgs.slice(cssStartIdx)
+		expect(cssArgs.length).toBe(cCount)
+		expect(cssArgs.length).toBeGreaterThan(0)
+		// CSS args should come in pairs: color + reset
+		expect(cssArgs.length % 2).toBe(0)
+	})
+
+	test('text format uses %c CSS in browser when colorful=true', () => {
+		const logger = new TestLogger({
+			level: 'debug',
+			colorful: true,
+			logfMinCharLen: 0,
+			format: formats.text
+		})
+
+		const logArgs = logger.testBuildLogArgs('debug', 'hello')
+		expect(logArgs).toBeDefined()
+		if (!logArgs) throw new Error('failed to build log args')
+
+		expect(logArgs[0]).toContain('%c')
+	})
+
+	test('json format has no %c regardless of colorful in browser', () => {
+		const logger = new TestLogger({
+			level: 'debug',
+			colorful: true,
+			logfMinCharLen: 0,
+			format: formats.json
+		})
+
+		const logArgs = logger.testBuildLogArgs('debug', 'test')
+		expect(logArgs).toBeDefined()
+		if (!logArgs) throw new Error('failed to build log args')
+
+		expect(logArgs[0]).not.toContain('%c')
+	})
 })

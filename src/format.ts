@@ -13,6 +13,16 @@ const colorTmpls: {
 	panic: '\x1b[31m%s\x1b[0m'
 }
 
+const colorCSS: Record<string, string> = {
+	trace: 'color: #999',
+	debug: 'color: #56b6c2',
+	info: 'color: #56b6c2',
+	warn: 'color: #e5c07b',
+	error: 'color: #e06c75; font-weight: bold',
+	fatal: 'color: #e06c75; font-weight: bold',
+	panic: 'color: #e06c75; font-weight: bold'
+}
+
 const levelAbbrs: {
 	[lvl: string]: string
 } = {
@@ -25,23 +35,38 @@ const levelAbbrs: {
 	panic: 'PANI'
 }
 
+let _cssStyles: string[] = []
+
+function isBrowserEnv (): boolean {
+	return typeof window !== 'undefined' && typeof window.document !== 'undefined'
+}
+
 function buildColorFont (str: string, level: string): string {
 	const tmpl = colorTmpls[level]
 	return tmpl ? tmpl.replace('%s', `${str}`) : str
 }
 
+function applyColor (str: string, level: string, colorful: boolean): string {
+	if (!colorful) return str
+	if (isBrowserEnv()) {
+		const css = colorCSS[level] || ''
+		_cssStyles.push(css, '')
+		return `%c${str}%c`
+	}
+	return buildColorFont(str, level)
+}
+
 function buildText (level: TLevel, key: string, value: string, colorful?: boolean): string {
-	return `${colorful ? buildColorFont(key, level) : key}=${/\s/.test(value) ? `"${value}"` : value}`
+	return `${applyColor(key, level, !!colorful)}=${/\s/.test(value) ? `"${value}"` : value}`
 }
 
 const defaultFormat: TLogFormatFn = function (logItem) {
+	_cssStyles = []
 	const { level, time, logs, colorful, error, fields } = logItem
 	let out: any[] = []
 
 	let levelStr = `${levelAbbrs[level] ? levelAbbrs[level] : level}`
-	if (colorful) {
-		levelStr = buildColorFont(levelStr, level)
-	}
+	levelStr = applyColor(levelStr, level, colorful)
 	const timeStr = formatTime(time)
 	out.push(`${levelStr}[${timeStr}]`)
 
@@ -52,11 +77,11 @@ const defaultFormat: TLogFormatFn = function (logItem) {
 	}
 
 	if (error && error instanceof Error) {
-		const errStr = `${buildColorFont('error', level)}="${error.message}"`
+		const errStr = `${applyColor('error', level, colorful)}="${error.message}"`
 		out.push(errStr)
 	}
 
-	return out
+	return out.concat(_cssStyles)
 }
 
 const jsonFormat: TLogFormatFn = function (logItem) {
@@ -81,6 +106,7 @@ const jsonFormat: TLogFormatFn = function (logItem) {
 }
 
 const textFormat: TLogFormatFn = function (logItem) {
+	_cssStyles = []
 	const { colorful, level, time, logs, error, fields = {} } = logItem
 	const out: any[] = []
 
@@ -95,7 +121,7 @@ const textFormat: TLogFormatFn = function (logItem) {
 		out.push(buildText(level, key, `${fields[key]}`, colorful))
 	}
 
-	return [out.join(' ')]
+	return [out.join(' ')].concat(_cssStyles)
 }
 
 export const formats = {

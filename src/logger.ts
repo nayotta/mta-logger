@@ -1,5 +1,6 @@
 import { ILogger, TAddLogFnHooks, TFields, TLevel, TLogFFn, TLogFValue, TLogFn, TLogFnHook, TLogFormatFn } from './interface.js'
 import { formats } from './format.js'
+import { sprintf } from 'sprintf-js'
 
 export class Logger implements ILogger {
 	private levels: TLevel[] = ['trace', 'debug', 'info', 'warn', 'error', 'fatal', 'panic', 'off']
@@ -176,11 +177,11 @@ export class Logger implements ILogger {
 	}
 
 	protected _buildLogTmpl (tmpl: string, args?: TLogFValue[]): string {
-		let out = tmpl
+		let out: string
 		if (args && args.length > 0) {
-			args.forEach(item => {
-				out = out.replace(/%s/, `${item}`)
-			})
+			out = sprintf(tmpl, ...args)
+		} else {
+			out = tmpl
 		}
 		return out.length < this.logfMinCharLen ? out.padEnd(this.logfMinCharLen, ' ') : out
 	}

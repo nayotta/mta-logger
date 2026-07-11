@@ -22,7 +22,7 @@ export type TFields = {
 	[field: string]: TFieldValue
 }
 
-export type TLogFValue = string|number|boolean
+export type TLogFValue = any
 
 export type TLogFn = (...log: any[]) => void
 

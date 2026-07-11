@@ -3,6 +3,7 @@
 	"compilerOptions": {
 		"target": "es2015",
 		"module": "CommonJS",
+		"moduleResolution": "node",
 		"outDir": "./lib/cjs"
 	}
 }
