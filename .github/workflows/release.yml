@@ -11,18 +11,17 @@ jobs:
     npm-release:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v2
-            - uses: actions/setup-node@v2
+            - uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+            - uses: actions/setup-node@v4
               with:
                   node-version: "18.x"
                   registry-url: "https://registry.npmjs.org"
                   scope: "@nayotta"
-            - uses: little-core-labs/get-git-tag@v3.0.1
-              id: tagName
-              with:
-                  tagRegex: "v(.*)"
             - run: |-
-                  cat package.json | jq --arg arg1 "${GIT_TAG_NAME}" '.version |= $arg1' > package.json.tmp && mv package.json.tmp package.json
+                  TAG_VERSION="${GITHUB_REF_NAME#v}"
+                  cat package.json | jq --arg arg1 "${TAG_VERSION}" '.version |= $arg1' > package.json.tmp && mv package.json.tmp package.json
                   echo './package.json'
                   cat package.json | grep version
             - run: npm install
@@ -35,18 +34,17 @@ jobs:
     pkg-release:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v2
-            - uses: actions/setup-node@v2
+            - uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+            - uses: actions/setup-node@v4
               with:
                   node-version: "18.x"
                   registry-url: "https://npm.pkg.github.com"
                   scope: "@nayotta"
-            - uses: little-core-labs/get-git-tag@v3.0.1
-              id: tagName
-              with:
-                  tagRegex: "v(.*)"
             - run: |-
-                  cat package.json | jq --arg arg1 "${GIT_TAG_NAME}" '.version |= $arg1' > package.json.tmp && mv package.json.tmp package.json
+                  TAG_VERSION="${GITHUB_REF_NAME#v}"
+                  cat package.json | jq --arg arg1 "${TAG_VERSION}" '.version |= $arg1' > package.json.tmp && mv package.json.tmp package.json
                   echo './package.json'
                   cat package.json | grep version
             - run: npm install
