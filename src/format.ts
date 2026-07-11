@@ -1,4 +1,4 @@
-import { TLevel, TLogFormatFn } from './interface.js'
+import { TLevel, TLogFormatFn, TLogItem } from './interface.js'
 import { formatTime } from './time.js'
 
 const colorTmpls: {
@@ -60,9 +60,58 @@ function buildText (level: TLevel, key: string, value: string, colorful?: boolea
 	return `${applyColor(key, level, !!colorful)}=${/\s/.test(value) ? `"${value}"` : value}`
 }
 
+function escapeConsoleFormat (str: string): string {
+	return str.replace(/%/g, '%%')
+}
+
+function appendBrowserText (out: any[], str: string): void {
+	out[0] += escapeConsoleFormat(str)
+}
+
+function appendBrowserColorText (out: any[], str: string, level: string): void {
+	out[0] += `%c${escapeConsoleFormat(str)}%c`
+	out.push(colorCSS[level] || '', '')
+}
+
+function appendBrowserLogValue (out: any[], value: any): void {
+	out[0] += typeof value === 'string' ? '%s' : '%o'
+	out.push(value)
+}
+
+function buildBrowserDefaultArgs (logItem: TLogItem): any[] {
+	const { level, time, logs, error, fields } = logItem
+	const out: any[] = ['']
+
+	appendBrowserColorText(out, levelAbbrs[level] ? levelAbbrs[level] : level, level)
+	appendBrowserText(out, `[${formatTime(time)}]`)
+
+	if (logs && logs.length > 0) {
+		logs.forEach(log => {
+			appendBrowserText(out, ' ')
+			appendBrowserLogValue(out, log)
+		})
+	}
+
+	for (const key in fields) {
+		const value = `${fields[key]}`
+		appendBrowserText(out, ' ')
+		appendBrowserColorText(out, key, level)
+		appendBrowserText(out, `=${/\s/.test(value) ? `"${value}"` : value}`)
+	}
+
+	if (error && error instanceof Error) {
+		appendBrowserText(out, ' ')
+		appendBrowserColorText(out, 'error', level)
+		appendBrowserText(out, `="${error.message}"`)
+	}
+
+	return out
+}
+
 const defaultFormat: TLogFormatFn = function (logItem) {
 	_cssStyles = []
 	const { level, time, logs, colorful, error, fields } = logItem
+	if (colorful && isBrowserEnv()) return buildBrowserDefaultArgs(logItem)
 	let out: any[] = []
 
 	let levelStr = `${levelAbbrs[level] ? levelAbbrs[level] : level}`

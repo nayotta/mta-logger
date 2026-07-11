@@ -202,6 +202,40 @@ test('default format', () => {
 	expect(logArgs[4]).toBe('module="module 1"')
 })
 
+test('default format colorful browser args', () => {
+	const previousWindow = (globalThis as any).window
+	;(globalThis as any).window = {
+		document: {}
+	}
+
+	try {
+		const logger = new TestLogger({
+			level: 'debug',
+			colorful: true,
+			fields: {
+				'#comp': 'LacUpdater'
+			}
+		})
+
+		const logArgs = logger.testBuildLogArgs('debug', 'hello')
+		expect(logArgs).toBeDefined()
+		if (!logArgs) throw new Error('failed to build log args')
+		expect(logArgs.length).toBe(6)
+		expect(/^%cDEBU%c\[.+\] %s %c#comp%c=LacUpdater$/.test(logArgs[0])).toBe(true)
+		expect(logArgs[1]).toBe('color: #56b6c2')
+		expect(logArgs[2]).toBe('')
+		expect(logArgs[3]).toBe('hello')
+		expect(logArgs[4]).toBe('color: #56b6c2')
+		expect(logArgs[5]).toBe('')
+	} finally {
+		if (previousWindow === undefined) {
+			delete (globalThis as any).window
+		} else {
+			;(globalThis as any).window = previousWindow
+		}
+	}
+})
+
 test('json format', () => {
 	const logger = new TestLogger({
 		level: 'debug',
@@ -708,27 +742,12 @@ describe('browser colorful (%c CSS style)', () => {
 		expect(logArgs).toBeDefined()
 		if (!logArgs) throw new Error('failed to build log args')
 
-		// CSS args are at the tail, each pair is ["color:...", ""]
-		// find the first "color:" arg (marks where CSS args begin)
-		let cssStartIdx = logArgs.length
-		for (let i = 0; i < logArgs.length; i++) {
-			if (typeof logArgs[i] === 'string' && (logArgs[i] as string).startsWith('color:')) {
-				cssStartIdx = i
-				break
-			}
-		}
-
-		// count %c in message portion only
-		let cCount = 0
-		for (let i = 0; i < cssStartIdx; i++) {
-			if (typeof logArgs[i] === 'string') {
-				cCount += ((logArgs[i] as string).match(/%c/g) || []).length
-			}
-		}
-		const cssArgs = logArgs.slice(cssStartIdx)
+		const cCount = ((logArgs[0] as string).match(/%c/g) || []).length
+		const cssArgs = logArgs.filter((arg, index) => {
+			return index > 0 && typeof arg === 'string' && (arg.startsWith('color:') || arg === '')
+		})
 		expect(cssArgs.length).toBe(cCount)
 		expect(cssArgs.length).toBeGreaterThan(0)
-		// CSS args should come in pairs: color + reset
 		expect(cssArgs.length % 2).toBe(0)
 	})
 
