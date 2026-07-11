@@ -4,6 +4,9 @@ on:
   release:
     types: [created]
 
+permissions:
+  contents: read
+
 jobs:
   npm-release:
     if: ${{ !contains(github.event.release.tag_name, '-') }}
