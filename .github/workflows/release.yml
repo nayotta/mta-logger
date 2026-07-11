@@ -1,58 +1,57 @@
 name: Node.js Package
 
 on:
-  release:
-    types: [created]
+    release:
+        types: [created]
 
 permissions:
-  contents: read
+    contents: read
 
 jobs:
-  npm-release:
-    if: ${{ !github.event.release.prerelease }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
-        with:
-          node-version: '18.x'
-          registry-url: 'https://registry.npmjs.org'
-          scope: '@nayotta'
-      - uses: little-core-labs/get-git-tag@v3.0.1
-        id: tagName
-        with:
-          tagRegex: "v(.*)"
-      - run: |-
-          cat package.json | jq --arg arg1 "${GIT_TAG_NAME}" '.version |= $arg1' > package.json.tmp && mv package.json.tmp package.json
-          echo './package.json'
-          cat package.json | grep version
-      - run: npm install
-      - run: npm run lint
-      - run: npm run build
-      - run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_ACCESS_TOKEN }}
+    npm-release:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
+            - uses: actions/setup-node@v2
+              with:
+                  node-version: "18.x"
+                  registry-url: "https://registry.npmjs.org"
+                  scope: "@nayotta"
+            - uses: little-core-labs/get-git-tag@v3.0.1
+              id: tagName
+              with:
+                  tagRegex: "v(.*)"
+            - run: |-
+                  cat package.json | jq --arg arg1 "${GIT_TAG_NAME}" '.version |= $arg1' > package.json.tmp && mv package.json.tmp package.json
+                  echo './package.json'
+                  cat package.json | grep version
+            - run: npm install
+            - run: npm run lint
+            - run: npm run build
+            - run: npm publish --access public
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.NPM_ACCESS_TOKEN }}
 
-  pkg-release:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
-        with:
-          node-version: '18.x'
-          registry-url: 'https://npm.pkg.github.com'
-          scope: '@nayotta'
-      - uses: little-core-labs/get-git-tag@v3.0.1
-        id: tagName
-        with:
-          tagRegex: "v(.*)"
-      - run: |-
-          cat package.json | jq --arg arg1 "${GIT_TAG_NAME}" '.version |= $arg1' > package.json.tmp && mv package.json.tmp package.json
-          echo './package.json'
-          cat package.json | grep version
-      - run: npm install
-      - run: npm run lint
-      - run: npm run build
-      - run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.PKG_ACCESS_TOKEN }}
+    pkg-release:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
+            - uses: actions/setup-node@v2
+              with:
+                  node-version: "18.x"
+                  registry-url: "https://npm.pkg.github.com"
+                  scope: "@nayotta"
+            - uses: little-core-labs/get-git-tag@v3.0.1
+              id: tagName
+              with:
+                  tagRegex: "v(.*)"
+            - run: |-
+                  cat package.json | jq --arg arg1 "${GIT_TAG_NAME}" '.version |= $arg1' > package.json.tmp && mv package.json.tmp package.json
+                  echo './package.json'
+                  cat package.json | grep version
+            - run: npm install
+            - run: npm run lint
+            - run: npm run build
+            - run: npm publish
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.PKG_ACCESS_TOKEN }}
