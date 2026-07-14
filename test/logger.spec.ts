@@ -1,6 +1,9 @@
 /// <reference types="jest" />
 import { Logger, TLevel, TLogFValue, TLogItem, formats } from '../src/index.js'
 
+// eslint-disable-next-line no-control-regex
+const ANSI_REGEX = /\x1b\[[0-9;]*m/
+
 class TestLogger extends Logger {
 	public testDoLevelCheck (level: string): boolean {
 		return this.doLevelCheck(level)
@@ -227,6 +230,261 @@ test('default format colorful browser args', () => {
 		expect(logArgs[3]).toBe('hello')
 		expect(logArgs[4]).toBe('color: #56b6c2')
 		expect(logArgs[5]).toBe('')
+	} finally {
+		if (previousWindow === undefined) {
+			delete (globalThis as any).window
+		} else {
+			;(globalThis as any).window = previousWindow
+		}
+	}
+})
+
+test('browser env should NEVER produce ANSI escape codes (colorful=true)', () => {
+	const previousWindow = (globalThis as any).window
+	;(globalThis as any).window = { document: {} }
+
+	try {
+		const logger = new TestLogger({
+			level: 'debug',
+			colorful: true,
+			fields: {
+				'#comp': 'MlcViewPanel',
+				method: 'test'
+			}
+		})
+
+		const logArgs = logger.testBuildLogArgs('debug', 'list ner report assets success', { count: 114 })
+		expect(logArgs).toBeDefined()
+		if (!logArgs) throw new Error('failed to build log args')
+
+		// 所有参数中都不应该出现 ANSI 转义序列 (\u001b[...m)
+		for (const arg of logArgs) {
+			if (typeof arg === 'string') {
+				expect(arg).not.toMatch(ANSI_REGEX)
+			}
+		}
+	} finally {
+		if (previousWindow === undefined) {
+			delete (globalThis as any).window
+		} else {
+			;(globalThis as any).window = previousWindow
+		}
+	}
+})
+
+test('browser env should NEVER produce ANSI escape codes (colorful=false)', () => {
+	const previousWindow = (globalThis as any).window
+	;(globalThis as any).window = { document: {} }
+
+	try {
+		const logger = new TestLogger({
+			level: 'debug',
+			colorful: false,
+			fields: {
+				'#comp': 'MlcViewPanel'
+			}
+		})
+
+		const logArgs = logger.testBuildLogArgs('debug', 'test message')
+		expect(logArgs).toBeDefined()
+		if (!logArgs) throw new Error('failed to build log args')
+
+		for (const arg of logArgs) {
+			if (typeof arg === 'string') {
+				expect(arg).not.toMatch(ANSI_REGEX)
+			}
+		}
+	} finally {
+		if (previousWindow === undefined) {
+			delete (globalThis as any).window
+		} else {
+			;(globalThis as any).window = previousWindow
+		}
+	}
+})
+
+test('browser env withField should NOT produce ANSI escape codes', () => {
+	const previousWindow = (globalThis as any).window
+	;(globalThis as any).window = { document: {} }
+
+	try {
+		const baseLogger = new TestLogger({
+			level: 'debug',
+			colorful: true
+		})
+
+		// 模拟 withField 调用链
+		const logger = new TestLogger({
+			level: baseLogger.level,
+			format: (baseLogger as any).format,
+			colorful: (baseLogger as any).colorful,
+			fields: {
+				...baseLogger.fields,
+				'#comp': 'MlcViewPanel'
+			}
+		})
+
+		const logArgs = logger.testBuildLogArgs('debug', 'list ner report assets success', { count: 114 })
+		expect(logArgs).toBeDefined()
+		if (!logArgs) throw new Error('failed to build log args')
+
+		for (const arg of logArgs) {
+			if (typeof arg === 'string') {
+				expect(arg).not.toMatch(ANSI_REGEX)
+			}
+		}
+	} finally {
+		if (previousWindow === undefined) {
+			delete (globalThis as any).window
+		} else {
+			;(globalThis as any).window = previousWindow
+		}
+	}
+})
+
+test('browser env withField colorful inheritance', () => {
+	// 不 mock window，测试 withField 是否正确继承 colorful
+	const logger = new TestLogger({
+		level: 'debug',
+		colorful: true
+	})
+
+	const withFieldLogger = logger.withField('#comp', 'MlcViewPanel') as TestLogger
+	expect(withFieldLogger.colorful).toBe(true)
+	expect(withFieldLogger.fields).toEqual({ '#comp': 'MlcViewPanel' })
+})
+
+test('non-browser env colorful=true should produce ANSI codes (expected)', () => {
+	// 确保非浏览器环境下没有 window 对象
+	const previousWindow = (globalThis as any).window
+	if (previousWindow !== undefined) {
+		delete (globalThis as any).window
+	}
+
+	try {
+		const logger = new TestLogger({
+			level: 'debug',
+			colorful: true,
+			fields: {
+				'#comp': 'MlcViewPanel'
+			}
+		})
+
+		const logArgs = logger.testBuildLogArgs('debug', 'test message')
+		expect(logArgs).toBeDefined()
+		if (!logArgs) throw new Error('failed to build log args')
+
+		// 非浏览器环境下，ANSI 码是预期的行为
+		const hasAnsi = logArgs.some(arg => typeof arg === 'string' && ANSI_REGEX.test(arg))
+		expect(hasAnsi).toBe(true)
+	} finally {
+		if (previousWindow !== undefined) {
+			;(globalThis as any).window = previousWindow
+		}
+	}
+})
+
+test('defaultFormat directly: browser env must not produce ANSI', () => {
+	const previousWindow = (globalThis as any).window
+	;(globalThis as any).window = { document: {} }
+
+	try {
+		const logItem: TLogItem = {
+			level: 'debug',
+			time: new Date(),
+			logs: ['list ner report assets success', { count: 114 }],
+			colorful: true,
+			fields: {
+				'#comp': 'MlcViewPanel'
+			}
+		}
+
+		const result = formats.default(logItem)
+
+		for (const arg of result) {
+			if (typeof arg === 'string') {
+				expect(arg).not.toMatch(ANSI_REGEX)
+			}
+		}
+	} finally {
+		if (previousWindow === undefined) {
+			delete (globalThis as any).window
+		} else {
+			;(globalThis as any).window = previousWindow
+		}
+	}
+})
+
+test('browser env colorful=true: format string %c placeholders must match CSS arg count', () => {
+	const previousWindow = (globalThis as any).window
+	;(globalThis as any).window = { document: {} }
+
+	try {
+		const logger = new TestLogger({
+			level: 'debug',
+			colorful: true,
+			fields: {
+				'#comp': 'MlcViewPanel',
+				method: 'test'
+			}
+		})
+
+		const logArgs = logger.testBuildLogArgs('debug', 'hello')
+		expect(logArgs).toBeDefined()
+		if (!logArgs) throw new Error('failed to build log args')
+
+		// 格式字符串中的 %c 数量应该等于后续参数中 CSS 参数的总数
+		// appendBrowserColorText 每次 push 两个 CSS 参数（color + ''）
+		const formatStr = logArgs[0] as string
+		const pcCount = (formatStr.match(/%c/g) || []).length
+
+		// 统计所有格式占位符（%c, %s, %o, %d, %f 等）
+		const placeholderCount = (formatStr.match(/%[csodif]/g) || []).length
+		expect(logArgs.length - 1).toBe(placeholderCount)
+		expect(pcCount % 2).toBe(0) // %c 应该成对出现
+	} finally {
+		if (previousWindow === undefined) {
+			delete (globalThis as any).window
+		} else {
+			;(globalThis as any).window = previousWindow
+		}
+	}
+})
+
+test('browser env colorful=false should use plain text (no %c, no ANSI)', () => {
+	const previousWindow = (globalThis as any).window
+	;(globalThis as any).window = { document: {} }
+
+	try {
+		const logger = new TestLogger({
+			level: 'debug',
+			colorful: false,
+			fields: {
+				'#comp': 'MlcViewPanel',
+				method: 'test'
+			}
+		})
+
+		const logArgs = logger.testBuildLogArgs('debug', 'hello')
+		expect(logArgs).toBeDefined()
+		if (!logArgs) throw new Error('failed to build log args')
+
+		const formatStr = logArgs[0] as string
+
+		// colorful=false 时不应有 %c 占位符（无颜色）
+		expect(formatStr).not.toContain('%c')
+
+		// 不应有任何 ANSI 转义序列
+		for (const arg of logArgs) {
+			if (typeof arg === 'string') {
+				expect(arg).not.toMatch(ANSI_REGEX)
+			}
+		}
+
+		// 应该包含纯文本的 level 缩写和 fields
+		expect(formatStr).toContain('DEBU')
+		expect(formatStr).toContain('#comp=MlcViewPanel')
+		expect(formatStr).toContain('method=test')
 	} finally {
 		if (previousWindow === undefined) {
 			delete (globalThis as any).window
@@ -587,7 +845,7 @@ describe('terminal ANSI colorful', () => {
 		expect(logArgs).toBeDefined()
 		if (!logArgs) throw new Error('failed to build log args')
 		// eslint-disable-next-line no-control-regex
-		expect(logArgs[0]).toMatch(/\x1b\[\d+m/)
+		expect(logArgs[0]).toMatch(/\u001b\[\d+m/)
 	})
 
 	test('ANSI color differs by level', () => {
@@ -602,9 +860,9 @@ describe('terminal ANSI colorful', () => {
 		if (!debugArgs || !errorArgs) throw new Error('failed to build log args')
 
 		// eslint-disable-next-line no-control-regex
-		const debugCode = (debugArgs[0] as string).match(/\x1b\[(\d+)m/)
+		const debugCode = (debugArgs[0] as string).match(/\u001b\[(\d+)m/)
 		// eslint-disable-next-line no-control-regex
-		const errorCode = (errorArgs[0] as string).match(/\x1b\[(\d+)m/)
+		const errorCode = (errorArgs[0] as string).match(/\u001b\[(\d+)m/)
 		expect(debugCode).not.toBeNull()
 		expect(errorCode).not.toBeNull()
 		// debug=36(cyan), error=31(red)

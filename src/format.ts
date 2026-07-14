@@ -79,10 +79,14 @@ function appendBrowserLogValue (out: any[], value: any): void {
 }
 
 function buildBrowserDefaultArgs (logItem: TLogItem): any[] {
-	const { level, time, logs, error, fields } = logItem
+	const { level, time, logs, colorful, error, fields } = logItem
 	const out: any[] = ['']
 
-	appendBrowserColorText(out, levelAbbrs[level] ? levelAbbrs[level] : level, level)
+	if (colorful) {
+		appendBrowserColorText(out, levelAbbrs[level] ? levelAbbrs[level] : level, level)
+	} else {
+		appendBrowserText(out, levelAbbrs[level] ? levelAbbrs[level] : level)
+	}
 	appendBrowserText(out, `[${formatTime(time)}]`)
 
 	if (logs && logs.length > 0) {
@@ -95,13 +99,21 @@ function buildBrowserDefaultArgs (logItem: TLogItem): any[] {
 	for (const key in fields) {
 		const value = `${fields[key]}`
 		appendBrowserText(out, ' ')
-		appendBrowserColorText(out, key, level)
+		if (colorful) {
+			appendBrowserColorText(out, key, level)
+		} else {
+			appendBrowserText(out, key)
+		}
 		appendBrowserText(out, `=${/\s/.test(value) ? `"${value}"` : value}`)
 	}
 
 	if (error && error instanceof Error) {
 		appendBrowserText(out, ' ')
-		appendBrowserColorText(out, 'error', level)
+		if (colorful) {
+			appendBrowserColorText(out, 'error', level)
+		} else {
+			appendBrowserText(out, 'error')
+		}
 		appendBrowserText(out, `="${error.message}"`)
 	}
 
@@ -111,7 +123,7 @@ function buildBrowserDefaultArgs (logItem: TLogItem): any[] {
 const defaultFormat: TLogFormatFn = function (logItem) {
 	_cssStyles = []
 	const { level, time, logs, colorful, error, fields } = logItem
-	if (colorful && isBrowserEnv()) return buildBrowserDefaultArgs(logItem)
+	if (isBrowserEnv()) return buildBrowserDefaultArgs(logItem)
 	let out: any[] = []
 
 	let levelStr = `${levelAbbrs[level] ? levelAbbrs[level] : level}`
